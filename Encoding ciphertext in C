@@ -1,0 +1,67 @@
+#include <cs50.h>
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
+
+int main(int argc, string argv[])
+{
+
+    //Check program run with only one argument (Counting Command Line Arguments and Accessing the key)
+    if (argc != 2)
+        
+    {
+        printf("Enter a numerical key. Usage Example: ./caesar key\n");
+        return 1;
+    }
+    
+    else 
+    {
+        //Validate all of the key is a numeric value
+        string validation = argv[1];
+        for (int i = 0, length = strlen(validation); i < length; i++)
+        {
+            if (isdigit(validation[i]) == 0)
+            {
+                printf("Enter a numerical key. Usage Example: ./caesar key\n");
+                return 1;
+            }
+        }
+        
+        //Convert key into integer
+        int user_key = atoi(validation);
+        
+        //Ask user for text to be converted
+        string secret_message = get_string("Plaintext: ");
+        
+        printf("Ciphertext: ");
+        
+        //Convert and cipher their message
+        for (int j = 0, msg_length = strlen(secret_message); j < msg_length; j++)
+        {
+            //Convert each capital letter individually 
+            if (isupper(secret_message[j]))
+            {
+                char cap_letter_cipher = (((secret_message[j] - 'A') + user_key) % 26) + 'A';
+                printf("%c", cap_letter_cipher);
+            }
+            
+            //Convert each lower case letter individually
+            if (islower(secret_message[j]))
+            {
+                char lower_letter_cipher = (((secret_message[j] - 'a') + user_key) % 26) + 'a';
+                printf("%c", lower_letter_cipher);
+            }
+            
+            //Print out any non-letter characters
+            if (isalpha(secret_message[j]) == 0)
+            {
+                printf("%c", secret_message[j]);
+            }
+        }
+        printf("\n");
+        
+        //printf("Worked!\n");
+        //printf("%s\n", argv[1]);
+    }
+}
