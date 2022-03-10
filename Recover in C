@@ -1,0 +1,63 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define BUFFER_SIZE 512
+ 
+int main(int argc, char *argv[])
+{
+    //Confirm a command line argument entered
+    if (argc != 2)
+    {
+        printf("Usage: ./recover image\n");
+        return 1;
+    }
+    
+    //Open file input by the user 
+    FILE *file = fopen(argv[1], "r");
+    //Image files
+    FILE *img = NULL;
+    //File counter to rename recovered files
+    int counter = 0;
+    //Find jpg's
+    int located = 0;
+    //Get buffer
+    unsigned char buffer[BUFFER_SIZE];
+    //Make new file name [Staring as 000.jpg + terminating char]
+    char file_name[8];
+    
+    while (fread(buffer, 512, 1, file) == 1)
+    {
+        //Determine if file is jpg 
+        if (buffer[0] == 0xff && buffer[1] == 0xd8 && (buffer[3] & 0xf0) == 0xe0)
+        {
+            //Close any previously found jpg's
+            if (located == 1)
+            {
+                fclose(img);
+            }
+            //Determine you found a jpg
+            else
+            {
+                located = 1;
+            }
+            
+            //Name the file per counting convention
+            sprintf(file_name, "%03i.jpg", counter);
+            //Open file & increase filename count
+            img = fopen(file_name, "w");
+            counter++;
+        }
+        
+        //Write img to file 
+        if (located == 1)
+        {
+            fwrite(&buffer, 512, 1, img);
+        }
+    }
+    
+    //Close the file and located jpg
+    fclose(file);
+    fclose(img);
+    
+    return 0;
+}
