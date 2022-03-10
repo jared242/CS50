@@ -1,0 +1,160 @@
+#include <math.h>
+#include "helpers.h"
+
+// Convert image to grayscale
+void grayscale(int height, int width, RGBTRIPLE image[height][width])
+{
+    int gray_rgb;
+    
+    //Each row 
+    for (int i = 0; i < height; i++)
+    {
+        //Each Cloumn 
+        for (int j = 0; j < width; j++)
+        {
+            //Determine average color of pixel 
+            gray_rgb = round((image[i][j].rgbtRed + image[i][j].rgbtGreen + image[i][j].rgbtBlue)/3);
+            
+            //Change value of Red, Green Blue to average pixel color to create grey pixel
+            image[i][j].rgbtRed = gray_rgb;
+            image[i][j].rgbtGreen = gray_rgb;
+            image[i][j].rgbtBlue = gray_rgb;
+        }
+    }
+    return;
+}
+
+// Convert image to sepia
+void sepia(int height, int width, RGBTRIPLE image[height][width])
+{
+    int sepia_red;
+    int sepia_green;
+    int sepia_blue;
+    
+    //Each row 
+    for (int i = 0; i < height; i++)
+    {
+        //Use algorithm on each rgb color to determine new tint of each pixel 
+        for (int j = 0; j < width; j++)
+        {
+            sepia_red = round(.393 * image[i][j].rgbtRed + .769 * image[i][j].rgbtGreen + .189 * image[i][j].rgbtBlue);
+            sepia_green = round(.349 * image[i][j].rgbtRed + .686 * image[i][j].rgbtGreen + .168 * image[i][j].rgbtBlue);
+            sepia_blue = round(.275 * image[i][j].rgbtRed + .534 * image[i][j].rgbtGreen + .131 * image[i][j].rgbtBlue);
+            
+            //Change the color to the new tint unless it fall outside of the upper 255 range (Then use max value)
+            if (sepia_red < 255)
+            {
+                image[i][j].rgbtRed = sepia_red;
+            }
+            else
+            {
+                image[i][j].rgbtRed = 255;
+            }
+            
+            if (sepia_green < 255)
+            {
+                image[i][j].rgbtGreen = sepia_green;
+            }
+            else
+            {
+                image[i][j].rgbtGreen = 255;
+            }
+            
+            if (sepia_blue < 255)
+            {
+                image[i][j].rgbtBlue = sepia_blue;
+            }
+            else
+            {
+                image[i][j].rgbtBlue = 255;
+            }
+        }
+    }
+    return;
+}
+
+// Reflect image horizontally
+void reflect(int height, int width, RGBTRIPLE image[height][width])
+{
+    int halved_width = width / 2;
+    
+    for (int i = 0; i < height; i++)
+    {
+        //If the width of the image is even number, flip pixels from left to right
+        if (width % 2 == 0)
+        {
+            for (int j = 0; j < halved_width; j++)
+            {
+                RGBTRIPLE temp[height][width];
+                temp[i][j] = image[i][j];
+                image[i][j] = image[i][width - (j + 1)];
+                image[i][width - (j + 1)] = temp[i][j];
+            }
+        }
+        //If the width of the image is an uneven number, flip left to right accounting for middle strip
+        else if (width % 2 != 0)
+        {
+            for (int k = 0; k < (width - 1); k++)
+            {
+                RGBTRIPLE temp[height][width];
+                temp[i][k] = image[i][k];
+                image[i][k] = image[i][width - (k + 1)];
+                image[i][width - (k + 1)] = temp[i][k];
+            }
+        }
+    }
+    return;
+}
+
+// Blur image
+void blur(int height, int width, RGBTRIPLE image[height][width])
+{
+    RGBTRIPLE temp[height][width];
+    
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            float red_total = 0;
+            float green_total = 0;
+            float blue_total = 0;
+            int count = 0;
+            
+            for (int k = -1; k < 2; k++)
+            {
+                for (int l = -1; l < 2; l++)
+                {
+                    if ((i + k) < 0 || (i + k) > (height - 1))
+                    {
+                        continue;
+                    }
+                    
+                    if ((j + l) < 0 || (j + l) > (width - 1))
+                    {
+                        continue;
+                    }
+                    
+                    red_total = red_total + image[i + k][j + l].rgbtRed;
+                    green_total = green_total + image[i + k][j + l].rgbtGreen;
+                    blue_total = blue_total + image[i + k][j + l].rgbtBlue;
+                    count++;
+                }
+            }
+            
+            temp[i][j].rgbtRed = round(red_total / count);
+            temp[i][j].rgbtGreen = round(green_total / count);
+            temp[i][j].rgbtBlue = round(blue_total / count);
+        }
+    }
+    
+    for (int m = 0; m < height; m++)
+    {
+        for (int n = 0; n < width; n++)
+        {
+            image[m][n].rgbtRed = temp[m][n].rgbtRed;
+            image[m][n].rgbtGreen = temp[m][n].rgbtGreen;
+            image[m][n].rgbtBlue = temp[m][n].rgbtBlue;
+        }
+    }
+    return;
+}
